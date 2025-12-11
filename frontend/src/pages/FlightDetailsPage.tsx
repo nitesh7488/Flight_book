@@ -1,8 +1,10 @@
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { createBooking } from "../store/bookingSlice";
-import { motion } from "framer-motion";
+import styles from "./FlightDetailsPage.module.css";
 
 const FlightDetailsPage = () => {
   const { selectedFlight, passengers } = useAppSelector((s) => s.flights);
@@ -11,143 +13,410 @@ const FlightDetailsPage = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!selectedFlight) {
     navigate("/results");
     return null;
   }
 
+  // Format times
   const dep = new Date(selectedFlight.departureTime);
   const arr = new Date(selectedFlight.arrivalTime);
 
-  // 🔥 Total fare calculation here
-  const totalFare = selectedFlight.price * passengers;
+  // Calculate total fare
+  const baseFare = selectedFlight.price * passengers;
+  const tax = baseFare * 0.18; // 18% GST
+  const convenienceFee = 99;
+  const totalFare = baseFare + tax + convenienceFee;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const action: any = await dispatch(
-      createBooking({
+    setIsLoading(true);
+    
+    try {
+      const bookingData = {
         flightId: selectedFlight.id,
         passengers,
         passengerName: name,
         passengerEmail: email,
-      })
-    );
+        passengerPhone: phone, // This will now work
+      };
 
-    if (action.meta.requestStatus === "fulfilled") {
-      navigate(`/booking-success/${action.payload.id}`);
+      const action = await dispatch(createBooking(bookingData));
+
+      if (action.meta.requestStatus === "fulfilled") {
+        navigate(`/booking-success/${action.payload.id}`);
+      }
+    } catch (error) {
+      console.error("Booking failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Format time to 12-hour format
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  // Format date
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Get airline logo text (fallback if no logo URL)
+  const getAirlineLogoText = (airlineName: string) => {
+    return airlineName
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Get airport code from city name
+  const getAirportCode = (city: string) => {
+    return city.substring(0, 3).toUpperCase();
+  };
+
+  // Animation variants
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const headerVariants: Variants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
+  const flightVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15,
+        delay: 0.2
+      }
+    }
+  };
+
+  const formVariants: Variants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 15,
+        delay: 0.3
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-slate-100 pt-24 px-4 pb-10">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <div className={styles.container}>
+      {/* Background Elements */}
+      <div className={`${styles.backgroundCircle} ${styles.circle1}`}></div>
+      <div className={`${styles.backgroundCircle} ${styles.circle2}`}></div>
 
-        {/* HEADER */}
-        <div className="mb-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            🛫 Flight Details
+      <div className={styles.mainContainer}>
+        {/* Header */}
+        <motion.div 
+          className={styles.header}
+          variants={headerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className={styles.badge}>
+            <div className={styles.badgeDot}></div>
+            <span>Flight Details & Booking</span>
+          </div>
+          
+          <h1 className={styles.title}>
+            <span className={styles.titleEmoji}>🛫</span>
+            Confirm Your Flight
           </h1>
-          <p className="text-xs text-slate-500">Review info & confirm booking</p>
-        </div>
+          
+          <p className={styles.subtitle}>
+            Review your flight details and complete the booking process
+          </p>
+        </motion.div>
 
-        <main className="grid md:grid-cols-3 gap-6">
-
-          {/* LEFT — FLIGHT SUMMARY */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:col-span-2 space-y-5"
+        {/* Main Content Grid */}
+        <motion.div 
+          className={styles.mainGrid}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Left Column - Flight Details */}
+          <motion.div 
+            className={styles.flightSummary}
+            variants={flightVariants}
           >
-            <div className="rounded-2xl shadow-md bg-white p-5 flex items-center gap-4 border border-slate-100">
-
-              <img
-                src={selectedFlight.airlineLogoUrl}
-                alt={selectedFlight.airlineName}
-                className="h-12 w-12 object-contain"
-              />
-
-              <div className="flex-1">
-                <p className="text-lg font-bold text-slate-800">
-                  {selectedFlight.airlineName}
-                </p>
-                <p className="text-xs text-slate-500">{selectedFlight.flightNumber}</p>
-              </div>
-
-              {/* 🔥 Total price instead of single fare */}
-              <div className="text-right">
-                <span className="px-3 py-1 text-sm font-semibold bg-blue-600 text-white rounded-full shadow-sm">
-                  ₹{totalFare.toFixed(0)}
-                </span>
-                <p className="text-[10px] text-slate-400 mt-1">{passengers} Passenger(s)</p>
-              </div>
-            </div>
-
-            {/* TIMING + ROUTE DETAILS */}
-            <div className="rounded-2xl shadow-md bg-white grid grid-cols-3 p-5 text-sm border border-slate-100">
-
-              <div>
-                <p className="text-[11px] uppercase font-semibold text-slate-500">From</p>
-                <p className="text-base font-bold">{selectedFlight.fromCity}</p>
-                <p className="text-xs text-slate-400">
-                  {dep.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center justify-center">
-                <p className="text-[11px] uppercase font-semibold text-slate-500">Duration</p>
-                <p className="font-semibold">{selectedFlight.durationMin} min</p>
-                <div className="w-full h-[4px] bg-slate-200 rounded-full mt-1 overflow-hidden">
-                  <div className="h-full bg-blue-500" style={{ width: "60%" }} />
+            {/* Flight Card */}
+            <div className={styles.flightCard}>
+              {/* Flight Header */}
+              <div className={styles.flightHeader}>
+                <div className={styles.airlineInfo}>
+                  <div className={styles.airlineLogo}>
+                    {selectedFlight.airlineLogoUrl ? (
+                      <img
+                        src={selectedFlight.airlineLogoUrl}
+                        alt={selectedFlight.airlineName}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement!.textContent = getAirlineLogoText(selectedFlight.airlineName);
+                        }}
+                      />
+                    ) : (
+                      getAirlineLogoText(selectedFlight.airlineName)
+                    )}
+                  </div>
+                  <div className={styles.airlineDetails}>
+                    <div className={styles.airlineName}>{selectedFlight.airlineName}</div>
+                    <div className={styles.flightNumber}>Flight {selectedFlight.flightNumber}</div>
+                  </div>
+                </div>
+                
+                <div className={styles.priceBadge}>
+                  <span>₹{totalFare.toLocaleString()}</span>
+                  <div className={styles.passengerCount}>
+                    <span>👤</span>
+                    <span>{passengers} Passenger{passengers > 1 ? 's' : ''}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="text-right">
-                <p className="text-[11px] uppercase font-semibold text-slate-500">To</p>
-                <p className="text-base font-bold">{selectedFlight.toCity}</p>
-                <p className="text-xs text-slate-400">
-                  {arr.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </p>
+              {/* Flight Route */}
+              <div className={styles.flightRoute}>
+                {/* Departure */}
+                <div className={styles.routeSection}>
+                  <div className={styles.routeLabel}>Departure</div>
+                  <div className={styles.airportCode}>
+                    {getAirportCode(selectedFlight.fromCity)}
+                  </div>
+                  <div className={styles.cityName}>{selectedFlight.fromCity}</div>
+                  <div className={styles.time}>{formatTime(dep)}</div>
+                  <div className={styles.date}>{formatDate(dep)}</div>
+                </div>
+
+                {/* Route Center */}
+                <div className={styles.routeCenter}>
+                  <div className={styles.routeArrow}>→</div>
+                  <div className={styles.duration}>{selectedFlight.durationMin} min</div>
+                  <div className={styles.durationBar}>
+                    <div className={styles.durationFill}></div>
+                  </div>
+                </div>
+
+                {/* Arrival */}
+                <div className={styles.routeSection}>
+                  <div className={styles.routeLabel}>Arrival</div>
+                  <div className={styles.airportCode}>
+                    {getAirportCode(selectedFlight.toCity)}
+                  </div>
+                  <div className={styles.cityName}>{selectedFlight.toCity}</div>
+                  <div className={styles.time}>{formatTime(arr)}</div>
+                  <div className={styles.date}>{formatDate(arr)}</div>
+                </div>
               </div>
 
+              {/* Flight Details */}
+              <div className={styles.flightDetails}>
+                <div className={styles.detailCard}>
+                  <div className={styles.detailLabel}>Duration</div>
+                  <div className={styles.detailValue}>
+                    <span className={styles.detailIcon}>⏱️</span>
+                    {selectedFlight.durationMin} minutes
+                  </div>
+                </div>
+
+                <div className={styles.detailCard}>
+                  <div className={styles.detailLabel}>Price per Person</div>
+                  <div className={styles.detailValue}>
+                    <span className={styles.detailIcon}>💰</span>
+                    ₹{selectedFlight.price.toLocaleString()}
+                  </div>
+                </div>
+
+                <div className={styles.detailCard}>
+                  <div className={styles.detailLabel}>Flight Number</div>
+                  <div className={styles.detailValue}>
+                    <span className={styles.detailIcon}>✈️</span>
+                    {selectedFlight.flightNumber}
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Back Button */}
+            <motion.button
+              onClick={() => navigate("/results")}
+              className={styles.backButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span>←</span>
+              <span>Back to Results</span>
+            </motion.button>
           </motion.div>
 
-          {/* RIGHT — PASSENGER FORM */}
+          {/* Right Column - Passenger Form */}
           <motion.form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="rounded-2xl shadow-md bg-white p-5 h-fit space-y-4 border border-slate-100"
+            className={`${styles.passengerForm} ${isLoading ? styles.loading : ''}`}
+            variants={formVariants}
           >
-            <h2 className="text-sm font-bold text-slate-900">Passenger Details</h2>
+            <h2 className={styles.formHeader}>
+              <span className={styles.formIcon}>👤</span>
+              Passenger Details
+            </h2>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-600">Full Name</label>
+            {/* Name */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <span>👤</span>
+                Full Name
+              </label>
               <input
-                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                type="text"
+                className={styles.formInput}
+                placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-600">Email</label>
+            {/* Email */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <span>📧</span>
+                Email Address
+              </label>
               <input
                 type="email"
-                className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                className={styles.formInput}
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
 
-            <button className="w-full py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[.98] transition">
-              Confirm Booking ✈️
-            </button>
+            {/* Phone */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <span>📱</span>
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                className={styles.formInput}
+                placeholder="+91 9876543210"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Passengers Info */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <span>👥</span>
+                Passengers
+              </label>
+              <div className={styles.formInput} style={{ backgroundColor: 'var(--gray-50)' }}>
+                <strong>{passengers}</strong> passenger{passengers > 1 ? 's' : ''}
+              </div>
+            </div>
+
+            {/* Price Summary */}
+            <div className={styles.priceSummary}>
+              <div className={styles.priceRow}>
+                <span className={styles.priceLabel}>Base Fare ({passengers} × ₹{selectedFlight.price.toLocaleString()})</span>
+                <span className={styles.priceValue}>₹{baseFare.toLocaleString()}</span>
+              </div>
+              
+              <div className={styles.priceRow}>
+                <span className={styles.priceLabel}>Taxes & Fees (18%)</span>
+                <span className={styles.priceValue}>₹{tax.toFixed(0)}</span>
+              </div>
+              
+              <div className={styles.priceRow}>
+                <span className={styles.priceLabel}>Convenience Fee</span>
+                <span className={styles.priceValue}>₹{convenienceFee}</span>
+              </div>
+              
+              <div className={`${styles.priceRow} ${styles.total}`}>
+                <span className={styles.priceLabel}>Total Amount</span>
+                <span className={styles.priceValue}>₹{totalFare.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className={styles.formGroup}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  required 
+                  style={{ 
+                    width: '1rem', 
+                    height: '1rem',
+                    accentColor: 'var(--primary)',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span style={{ fontSize: '0.875rem', color: 'var(--gray-600)' }}>
+                  I agree to the <strong style={{ color: 'var(--primary)' }}>Terms & Conditions</strong> and <strong style={{ color: 'var(--primary)' }}>Privacy Policy</strong>
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <motion.button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className={styles.buttonIcon}>✈️</span>
+              <span>{isLoading ? "Processing..." : "Confirm Booking"}</span>
+            </motion.button>
           </motion.form>
-        </main>
+        </motion.div>
       </div>
     </div>
   );

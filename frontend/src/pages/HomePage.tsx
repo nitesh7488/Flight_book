@@ -1,73 +1,227 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import type { Variants } from "framer-motion"; // Type-only import
+import styles from "./HomePage.module.css";
 
 export default function HomePage() {
+  // Define proper variants with TypeScript types
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 12
+      }
+    }
+  };
+
+  const buttonVariants: Variants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 200,
+        damping: 15
+      }
+    },
+    hover: {
+      scale: 1.05,
+      transition: {
+        type: "spring" as const,
+        stiffness: 400,
+        damping: 10
+      }
+    },
+    tap: {
+      scale: 0.95
+    }
+  };
+
+  const statVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: i * 0.1,
+        type: "spring" as const,
+        stiffness: 150
+      }
+    }),
+    hover: {
+      y: -10,
+      transition: {
+        type: "spring" as const,
+        stiffness: 300
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex flex-col items-center justify-center overflow-hidden relative px-6">
+    <div className={styles.container}>
+      {/* Animated Background Circles */}
+      <div className={`${styles.backgroundCircle} ${styles.circle1}`}></div>
+      <div className={`${styles.backgroundCircle} ${styles.circle2}`}></div>
+      <div className={`${styles.backgroundCircle} ${styles.circle3}`}></div>
 
-      {/* Soft background blurred circles */}
-      <div className="absolute w-[380px] h-[380px] bg-blue-300/30 blur-[120px] rounded-full -top-24 -left-24"></div>
-      <div className="absolute w-[380px] h-[380px] bg-purple-300/25 blur-[120px] rounded-full -bottom-24 -right-24"></div>
+      {/* Animated Clouds */}
+      <div className={`${styles.cloud} ${styles.cloud1}`}></div>
+      <div className={`${styles.cloud} ${styles.cloud2}`}></div>
+      <div className={`${styles.cloud} ${styles.cloud3}`}></div>
 
-      {/* Heading Section */}
-      <motion.h1
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-[38px] md:text-[48px] font-extrabold tracking-tight text-slate-800 drop-shadow-sm"
-        style={{ fontFamily: "'Poppins', sans-serif" }}
+      {/* Flying Plane */}
+      <motion.div 
+        className={styles.planeContainer}
+        initial={{ x: -100 }}
+        animate={{ x: "100vw" }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear"
+        }}
       >
-        Your Journey Begins Here ✈
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.8 }}
-        className="mt-2 text-[15px] md:text-[17px] text-slate-600 font-medium"
-        style={{ fontFamily: "'Inter', sans-serif" }}
-      >
-        Fast • Simple • Secure — Book your next flight effortlessly
-      </motion.p>
-
-      {/* Buttons */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.7 }}
-        className="flex gap-5 mt-8 flex-wrap"
-      >
-        <Link
-          to="/search"
-          className="px-7 py-3 rounded-xl text-white font-semibold text-[15px] shadow-lg shadow-blue-400/30
-                     bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600
-                     transition-all hover:scale-[1.04] active:scale-[0.97]"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
-        >
-          🔍 Search Flights
-        </Link>
-
-        <Link
-          to="/bookings"
-          className="px-7 py-3 rounded-xl text-white font-semibold text-[15px] shadow-lg shadow-green-400/30
-                     bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600
-                     transition-all hover:scale-[1.04] active:scale-[0.97]"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
-        >
-          📄 Your Bookings
-        </Link>
+        <svg className={styles.plane} viewBox="0 0 24 24" fill="none">
+          <path d="M10 9L3 12L10 15L12 21L15 12L21 9L15 6L12 3L10 9Z" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1"/>
+        </svg>
       </motion.div>
 
-      {/* Foot small text */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-6 text-[13px] text-slate-500"
-        style={{ fontFamily: "'Inter', sans-serif" }}
+      <motion.div 
+        className={styles.content}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        Made with ❤️ for smooth flight booking experience
-      </motion.p>
+        {/* Header Section */}
+        <motion.div className={styles.header} variants={itemVariants}>
+          <h1 className={styles.title}>
+            Your Journey Begins Here 
+            <span className={styles.titleEmoji}>✈</span>
+          </h1>
+          <p className={styles.subtitle}>
+            Fast • Simple • Secure — Book your next flight effortlessly
+          </p>
+        </motion.div>
+
+        {/* Stats Section */}
+        <motion.div className={styles.statsContainer}>
+          {[
+            { value: "50K+", label: "Happy Travelers" },
+            { value: "200+", label: "Destinations" },
+            { value: "24/7", label: "Support" },
+            { value: "99%", label: "Satisfaction" }
+          ].map((stat, index) => (
+            <motion.div
+              key={index}
+              className={styles.statCard}
+              variants={statVariants}
+              custom={index}
+              initial="hidden"
+              animate="visible"
+              whileHover="hover"
+            >
+              <div className={styles.statValue}>{stat.value}</div>
+              <div className={styles.statLabel}>{stat.label}</div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Main Buttons */}
+        <motion.div className={styles.buttonsContainer}>
+          <motion.div 
+            variants={buttonVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
+            whileTap="tap"
+          >
+            <Link
+              to="/search"
+              className={`${styles.button} ${styles.buttonPrimary}`}
+            >
+              <span>🔍</span>
+              <span>Search Flights</span>
+            </Link>
+          </motion.div>
+
+          <motion.div 
+            variants={buttonVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
+            whileTap="tap"
+          >
+            <Link
+              to="/bookings"
+              className={`${styles.button} ${styles.buttonSecondary}`}
+            >
+              <span>📄</span>
+              <span>Your Bookings</span>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* Features Section */}
+        <motion.div className={styles.featuresContainer}>
+          {[
+            {
+              icon: "⚡",
+              title: "Lightning Fast",
+              description: "Find and book flights in under 60 seconds with our optimized search engine."
+            },
+            {
+              icon: "🔒",
+              title: "Secure & Safe",
+              description: "Bank-level security for all transactions. Your data is always protected."
+            },
+            {
+              icon: "💸",
+              title: "Best Prices",
+              description: "We compare prices across 500+ airlines to ensure you get the best deal."
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              className={styles.featureCard}
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              whileHover={{ y: -10 }}
+            >
+              <div className={styles.featureIcon}>{feature.icon}</div>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureDescription}>{feature.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div 
+          className={styles.footer}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+        >
+          <p className={styles.footerText}>
+            Made with <span className={styles.heart}>❤️</span> for smooth flight booking experience
+          </p>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

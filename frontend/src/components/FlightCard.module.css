@@ -1,0 +1,361 @@
+/* CSS Variables - Professional Color Palette */
+:root {
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #2563eb;
+  --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  
+  --success: #10b981;
+  --success-light: #34d399;
+  --success-dark: #059669;
+  
+  --warning: #f59e0b;
+  --warning-light: #fbbf24;
+  --warning-dark: #d97706;
+  
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  
+  --white: #ffffff;
+  --black: #000000;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Flight Card Container - Compact */
+.flightCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.flightCard:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.flightCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.flightCard:hover::before {
+  opacity: 1;
+}
+
+/* Card Header - Compact */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.airlineInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.airlineLogo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  object-fit: contain;
+  padding: 4px;
+  background: var(--white);
+}
+
+.airlineDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.airlineName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-800);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.2;
+}
+
+.flightNumber {
+  font-size: 11px;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.statusDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* Route Timeline - Compact */
+.routeSection {
+  margin-bottom: 16px;
+}
+
+.routeTimeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.departureInfo,
+.arrivalInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 60px;
+}
+
+.time {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-900);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.airportCode {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+  background: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Timeline - Compact */
+.timeline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.duration {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.timelineBar {
+  width: 100%;
+  position: relative;
+  height: 2px;
+  background: var(--gray-200);
+  border-radius: 1px;
+}
+
+.timelineLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 1px;
+}
+
+.timelinePlane {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+  font-size: 12px;
+  color: var(--primary);
+}
+
+/* Action Section - Compact */
+.actionSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.priceDisplay {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.currency {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-right: 1px;
+}
+
+.price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1;
+}
+
+.perPerson {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+/* Book Button - Compact */
+.bookButton {
+  padding: 8px 20px;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.bookButton:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .flightCard {
+    padding: 14px;
+  }
+  
+  .cardHeader {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+  
+  .airlineLogo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .airlineName {
+    font-size: 13px;
+  }
+  
+  .time {
+    font-size: 13px;
+  }
+  
+  .price {
+    font-size: 18px;
+  }
+  
+  .bookButton {
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .flightCard {
+    padding: 12px;
+  }
+  
+  .routeTimeline {
+    gap: 8px;
+  }
+  
+  .departureInfo,
+  .arrivalInfo {
+    min-width: 50px;
+  }
+  
+  .airportCode {
+    font-size: 11px;
+    padding: 1px 4px;
+  }
+  
+  .actionSection {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .priceSection {
+    text-align: center;
+  }
+  
+  .bookButton {
+    width: 100%;
+  }
+}
+
+/* Accessibility */
+.bookButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.flightCard:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

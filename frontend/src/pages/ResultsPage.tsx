@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { searchFlights, setSelectedFlight } from "../store/flightSlice";
 import FlightCard from "../components/FlightCard";
+import styles from "./ResultsPage.module.css";
 
 interface LocationState {
   from: string;
   to: string;
   date: string;
   passengers: number;
+  tripType?: string;
+  travelClass?: string;
 }
 
 export default function ResultsPage() {
@@ -24,17 +27,17 @@ export default function ResultsPage() {
   const state = location.state as LocationState | null;
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(5);
+  const [limit] = useState(8);
 
-  const [sortBy, setSortBy] = useState<"price" | "departure" | "duration">(
-    "price"
-  );
+  const [sortBy, setSortBy] = useState<"price" | "departure" | "duration">("price");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [minPrice, setMinPrice] = useState<number | undefined>();
-  const [maxPrice, setMaxPrice] = useState<number | undefined>();
-  const [maxDuration, setMaxDuration] = useState<number | undefined>();
-  const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    minPrice: undefined as number | undefined,
+    maxPrice: undefined as number | undefined,
+    maxDuration: undefined as number | undefined,
+    selectedAirlines: [] as string[],
+  });
 
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
@@ -42,7 +45,7 @@ export default function ResultsPage() {
   const airlines = useMemo(() => {
     const set = new Set<string>();
     flights.forEach((f) => set.add(f.airlineName));
-    return Array.from(set);
+    return Array.from(set).sort();
   }, [flights]);
 
   // First load – if direct /results without state, go back
@@ -51,7 +54,6 @@ export default function ResultsPage() {
       navigate("/search", { replace: true });
       return;
     }
-
     fetchFlights(1);
   }, []);
 
@@ -69,10 +71,10 @@ export default function ResultsPage() {
         limit,
         sortBy,
         sortOrder,
-        minPrice,
-        maxPrice,
-        maxDuration,
-        airlines: selectedAirlines,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        maxDuration: filters.maxDuration,
+        airlines: filters.selectedAirlines,
       })
     );
   };
@@ -81,15 +83,7 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!state) return;
     fetchFlights(currentPage);
-  }, [
-    currentPage,
-    sortBy,
-    sortOrder,
-    minPrice,
-    maxPrice,
-    maxDuration,
-    selectedAirlines,
-  ]);
+  }, [currentPage, sortBy, sortOrder, filters]);
 
   const onSelectFlight = (id: number) => {
     const f = flights.find((x) => x.id === id);
@@ -100,11 +94,17 @@ export default function ResultsPage() {
 
   const handleAirlineChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
-    if (checked) {
-      setSelectedAirlines((prev) => [...prev, value]);
-    } else {
-      setSelectedAirlines((prev) => prev.filter((a) => a !== value));
-    }
+    setFilters(prev => ({
+      ...prev,
+      selectedAirlines: checked 
+        ? [...prev.selectedAirlines, value]
+        : prev.selectedAirlines.filter(a => a !== value)
+    }));
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (key: keyof typeof filters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
@@ -135,88 +135,142 @@ export default function ResultsPage() {
   const changePage = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      minPrice: undefined,
+      maxPrice: undefined,
+      maxDuration: undefined,
+      selectedAirlines: [],
+    });
+    setSortBy("price");
+    setSortOrder("asc");
+    setCurrentPage(1);
   };
 
   const formattedDate = state?.date
-    ? new Date(state.date).toLocaleDateString(undefined, {
+    ? new Date(state.date).toLocaleDateString("en-US", {
+        weekday: 'short',
         day: "2-digit",
         month: "short",
         year: "numeric",
       })
     : "";
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-slate-100">
-      <div className="max-w-6xl mx-auto pt-20 pb-10 px-4 md:px-0">
+  // Loading skeletons
+  const renderSkeletons = () => (
+    <div className={styles.skeletonContainer}>
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className={styles.skeletonCard} />
+      ))}
+    </div>
+  );
 
+  return (
+    <div className={styles.container}>
+      {/* Background Animation Elements */}
+      <div className={styles.backgroundAnimation}>
+        <div className={styles.floatingCircle1}></div>
+        <div className={styles.floatingCircle2}></div>
+      </div>
+
+      <div className={styles.contentWrapper}>
         {/* 🔥 Top Header / Hero */}
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          transition={{ duration: 0.6 }}
+          className={styles.header}
         >
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[11px] font-semibold text-blue-700 tracking-wide uppercase">
-                Flight search results
-              </span>
-            </div>
-
-            <h1 className="text-[22px] md:text-[26px] font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              ✈ {state?.from || "From"} → {state?.to || "To"}
-            </h1>
-            <p className="text-[13px] text-slate-500 mt-1">
-              {formattedDate && (
-                <>
-                  Date:{" "}
-                  <span className="font-medium text-slate-700">
-                    {formattedDate}
-                  </span>{" "}
-                  ·{" "}
-                </>
-              )}
-              Passengers:{" "}
-              <span className="font-medium text-slate-700">
-                {state?.passengers ?? 1}
-              </span>
-            </p>
+          {/* Badge */}
+          <div className={styles.badge}>
+            <span className={styles.badgeDot} />
+            <span className={styles.badgeText}>
+              Flight search results
+            </span>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={() => navigate("/search")}
-              className="px-4 py-[6px] rounded-full bg-white/70 backdrop-blur-md 
-                         border border-blue-200 shadow-sm text-[12px] font-semibold 
-                         text-blue-600 hover:bg-blue-100 hover:border-blue-300 
-                         transition-all flex items-center gap-1"
-            >
-              New Search
-            </button>
+          <div className={styles.headerContent}>
+            <div>
+              <h1 className={styles.title}>
+                <span className={styles.fromCity}>{state?.from || "From"}</span>
+                <span className={styles.arrow}>→</span>
+                <span className={styles.toCity}>{state?.to || "To"}</span>
+              </h1>
+              <p className={styles.subtitle}>
+                {formattedDate && (
+                  <span className={styles.dateInfo}>
+                    <span className={styles.infoLabel}>Date:</span>
+                    <span className={styles.infoValue}>{formattedDate}</span>
+                  </span>
+                )}
+                <span className={styles.passengerInfo}>
+                  <span className={styles.infoLabel}>Passengers:</span>
+                  <span className={styles.infoValue}>{state?.passengers ?? 1}</span>
+                </span>
+                {state?.travelClass && (
+                  <span className={styles.classInfo}>
+                    <span className={styles.infoLabel}>Class:</span>
+                    <span className={styles.infoValue}>{state.travelClass}</span>
+                  </span>
+                )}
+              </p>
+            </div>
 
-            <p className="text-[11px] text-slate-500 text-right">
-              {total} flights found • Page {page} of {totalPages}
-            </p>
+            <div className={styles.headerActions}>
+              <motion.button
+                onClick={() => navigate("/search")}
+                className={styles.newSearchButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className={styles.buttonIcon}>🔍</span>
+                <span>New Search</span>
+              </motion.button>
+
+              <div className={styles.resultsInfo}>
+                <span className={styles.totalResults}>
+                  {total} {total === 1 ? 'flight' : 'flights'} found
+                </span>
+                {totalPages > 1 && (
+                  <span className={styles.pageInfo}>
+                    Page {page} of {totalPages}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </motion.div>
 
         {/* Mobile Filters Toggle */}
-        <div className="mb-4 md:hidden flex justify-between items-center">
-          <button
-            onClick={() => setShowFiltersMobile((prev) => !prev)}
-            className="px-4 py-2 rounded-full bg-white border border-slate-200 text-[12px] font-semibold text-slate-700 flex items-center gap-2 shadow-sm"
+        <motion.div 
+          className={styles.mobileFiltersToggle}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <motion.button
+            onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+            className={styles.filtersToggleButton}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <span>🎚 Filters</span>
-            <span className="text-[10px] text-slate-500">
-              {showFiltersMobile ? "Hide" : "Show"}
-            </span>
-          </button>
+            <span>🎚</span>
+            <span>Filters {filters.selectedAirlines.length > 0 && `(${filters.selectedAirlines.length})`}</span>
+            <motion.span 
+              animate={{ rotate: showFiltersMobile ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              ▼
+            </motion.span>
+          </motion.button>
 
-          <div className="flex items-center gap-2 text-[11px] text-slate-500">
-            <span className="hidden xs:inline">Sorted by</span>
+          <div className={styles.mobileSort}>
+            <span>Sort:</span>
             <select
-              className="border rounded-full px-3 py-[4px] text-[11px] bg-white"
+              className={styles.sortSelect}
               onChange={handleSortChange}
               defaultValue="price-asc"
             >
@@ -228,91 +282,154 @@ export default function ResultsPage() {
               <option value="duration-desc">Duration ↓</option>
             </select>
           </div>
-        </div>
+        </motion.div>
 
         {/* ===== Main Grid (Filters + Results) ===== */}
-        <main className="grid md:grid-cols-[260px,1fr] gap-6">
+        <main className={styles.mainGrid}>
+          {/* Filters Panel - Mobile */}
+          <AnimatePresence>
+            {showFiltersMobile && (
+              <motion.aside
+                className={styles.filtersPanelMobile}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className={styles.filtersHeader}>
+                  <h3>Filters</h3>
+                  <button 
+                    onClick={clearAllFilters}
+                    className={styles.clearFilters}
+                  >
+                    Clear all
+                  </button>
+                </div>
+                
+                {/* Price Range */}
+                <div className={styles.filterGroup}>
+                  <label className={styles.filterLabel}>Price Range (₹)</label>
+                  <div className={styles.priceInputs}>
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      className={styles.filterInput}
+                      value={filters.minPrice ?? ""}
+                      onChange={(e) => handleFilterChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <span className={styles.inputSeparator}>-</span>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      className={styles.filterInput}
+                      value={filters.maxPrice ?? ""}
+                      onChange={(e) => handleFilterChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                  </div>
+                </div>
 
-          {/* Filters Panel */}
+                {/* Duration */}
+                <div className={styles.filterGroup}>
+                  <label className={styles.filterLabel}>Max Duration (minutes)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g., 180"
+                    className={styles.filterInput}
+                    value={filters.maxDuration ?? ""}
+                    onChange={(e) => handleFilterChange('maxDuration', e.target.value ? Number(e.target.value) : undefined)}
+                  />
+                </div>
+
+                {/* Airline Filter */}
+                {airlines.length > 0 && (
+                  <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>Airlines</label>
+                    <div className={styles.airlineOptions}>
+                      {airlines.map((airline) => (
+                        <label key={airline} className={styles.airlineOption}>
+                          <input
+                            type="checkbox"
+                            value={airline}
+                            checked={filters.selectedAirlines.includes(airline)}
+                            onChange={handleAirlineChange}
+                          />
+                          <span className={styles.checkmark}></span>
+                          <span>{airline}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.aside>
+            )}
+          </AnimatePresence>
+
+          {/* Desktop Filters */}
           <motion.aside
-            initial={{ opacity: 0, x: -8 }}
+            className={styles.filtersPanelDesktop}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className={`bg-white/90 rounded-2xl shadow-md border border-slate-200 p-4 space-y-4 text-sm
-                        ${showFiltersMobile ? "block" : "hidden"} md:block`}
           >
-            <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-              <span className="text-blue-600">🎚</span> Filters
-            </h2>
-
+            <div className={styles.filtersHeader}>
+              <h3>Filters</h3>
+              <button 
+                onClick={clearAllFilters}
+                className={styles.clearFilters}
+              >
+                Clear all
+              </button>
+            </div>
+            
             {/* Price Range */}
-            <div>
-              <p className="text-xs font-semibold text-slate-600 mb-1">
-                Price Range (₹)
-              </p>
-              <div className="flex gap-2">
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>Price Range (₹)</label>
+              <div className={styles.priceInputs}>
                 <input
                   type="number"
                   placeholder="Min"
-                  className="w-1/2 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  value={minPrice ?? ""}
-                  onChange={(e) =>
-                    setMinPrice(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
+                  className={styles.filterInput}
+                  value={filters.minPrice ?? ""}
+                  onChange={(e) => handleFilterChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
                 />
+                <span className={styles.inputSeparator}>-</span>
                 <input
                   type="number"
                   placeholder="Max"
-                  className="w-1/2 border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  value={maxPrice ?? ""}
-                  onChange={(e) =>
-                    setMaxPrice(
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
+                  className={styles.filterInput}
+                  value={filters.maxPrice ?? ""}
+                  onChange={(e) => handleFilterChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
                 />
               </div>
             </div>
 
             {/* Duration */}
-            <div>
-              <p className="text-xs font-semibold text-slate-600 mb-1">
-                Max Duration (minutes)
-              </p>
+            <div className={styles.filterGroup}>
+              <label className={styles.filterLabel}>Max Duration (minutes)</label>
               <input
                 type="number"
-                placeholder="e.g. 180"
-                className="w-full border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={maxDuration ?? ""}
-                onChange={(e) =>
-                  setMaxDuration(
-                    e.target.value ? Number(e.target.value) : undefined
-                  )
-                }
+                placeholder="e.g., 180"
+                className={styles.filterInput}
+                value={filters.maxDuration ?? ""}
+                onChange={(e) => handleFilterChange('maxDuration', e.target.value ? Number(e.target.value) : undefined)}
               />
             </div>
 
             {/* Airline Filter */}
             {airlines.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-slate-600 mb-1">
-                  Airlines
-                </p>
-                <div className="space-y-1 max-h-40 overflow-auto pr-1">
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Airlines</label>
+                <div className={styles.airlineOptions}>
                   {airlines.map((airline) => (
-                    <label
-                      key={airline}
-                      className="flex items-center gap-2 text-xs text-slate-700"
-                    >
+                    <label key={airline} className={styles.airlineOption}>
                       <input
                         type="checkbox"
                         value={airline}
-                        checked={selectedAirlines.includes(airline)}
+                        checked={filters.selectedAirlines.includes(airline)}
                         onChange={handleAirlineChange}
                       />
-                      {airline}
+                      <span className={styles.checkmark}></span>
+                      <span>{airline}</span>
                     </label>
                   ))}
                 </div>
@@ -321,93 +438,158 @@ export default function ResultsPage() {
           </motion.aside>
 
           {/* Results + Sorting + Pagination */}
-          <section className="space-y-4">
-
+          <section className={styles.resultsSection}>
             {/* Desktop Sorting Row */}
-            <div className="hidden md:flex flex-row items-center justify-between gap-3">
+            <motion.div 
+              className={styles.desktopSortRow}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">
-                  Available Flights
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Refine results with filters & sorting on the left.
+                <h2 className={styles.resultsTitle}>Available Flights ✈️</h2>
+                <p className={styles.resultsSubtitle}>
+                  {total} flights found · Refine with filters
                 </p>
               </div>
 
               {/* Sorting */}
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-600">Sort by:</span>
+              <div className={styles.desktopSort}>
+                <span>Sort by:</span>
                 <select
-                  className="border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={styles.sortSelect}
                   onChange={handleSortChange}
                   defaultValue="price-asc"
                 >
                   <option value="price-asc">Price (Low → High)</option>
                   <option value="price-desc">Price (High → Low)</option>
-                  <option value="departure-asc">
-                    Departure (Early → Late)
-                  </option>
-                  <option value="departure-desc">
-                    Departure (Late → Early)
-                  </option>
-                  <option value="duration-asc">
-                    Duration (Short → Long)
-                  </option>
-                  <option value="duration-desc">
-                    Duration (Long → Short)
-                  </option>
+                  <option value="departure-asc">Departure (Early → Late)</option>
+                  <option value="departure-desc">Departure (Late → Early)</option>
+                  <option value="duration-asc">Duration (Short → Long)</option>
+                  <option value="duration-desc">Duration (Long → Short)</option>
                 </select>
               </div>
-            </div>
+            </motion.div>
 
-            {/* List */}
-            {loading && (
-              <p className="text-sm text-slate-500">Loading flights...</p>
-            )}
+            {/* Loading State */}
+            {loading && renderSkeletons()}
+
+            {/* Error State */}
             {error && (
-              <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">
-                {error}
-              </p>
-            )}
-            {!loading && flights.length === 0 && !error && (
-              <p className="text-sm text-slate-500">
-                No flights match your criteria. Try adjusting filters.
-              </p>
+              <motion.div 
+                className={styles.errorContainer}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <div className={styles.errorIcon}>⚠️</div>
+                <h3 className={styles.errorTitle}>Search Error</h3>
+                <p className={styles.errorMessage}>{error}</p>
+              </motion.div>
             )}
 
-            <div className="space-y-3">
-              {flights.map((f) => (
-                <FlightCard
-                  key={f.id}
-                  flight={f}
-                  onSelect={() => onSelectFlight(f.id)}
-                />
-              ))}
-            </div>
+            {/* No Results State */}
+            {!loading && !error && flights.length === 0 && (
+              <motion.div
+                className={styles.emptyState}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className={styles.emptyIcon}>✈️</div>
+                <h3 className={styles.emptyTitle}>No Flights Found</h3>
+                <p className={styles.emptySubtitle}>
+                  Try adjusting your filters or search criteria
+                </p>
+                <button 
+                  onClick={clearAllFilters}
+                  className={styles.emptyAction}
+                >
+                  Clear all filters
+                </button>
+              </motion.div>
+            )}
+
+            {/* Results List */}
+            {!loading && !error && flights.length > 0 && (
+              <motion.div 
+                className={styles.resultsList}
+                layout
+              >
+                <AnimatePresence>
+                  {flights.map((flight, index) => (
+                    <motion.div
+                      key={flight.id}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ 
+                        duration: 0.4,
+                        delay: index * 0.05,
+                        type: "spring",
+                        stiffness: 100
+                      }}
+                    >
+                      <FlightCard
+                        flight={flight}
+                        onSelect={() => onSelectFlight(flight.id)}
+                        passengers={state?.passengers || 1}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-4 text-xs">
+            {!loading && !error && flights.length > 0 && totalPages > 1 && (
+              <motion.div 
+                className={styles.pagination}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
                 <button
                   onClick={() => changePage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 border rounded disabled:opacity-50 bg-white hover:bg-slate-50"
+                  className={styles.paginationButton}
                 >
-                  Prev
+                  Previous
                 </button>
-
-                <span className="px-3 py-1 text-slate-600">
-                  Page {page} of {totalPages}
-                </span>
-
+                
+                <div className={styles.pageNumbers}>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => changePage(pageNum)}
+                        className={`${styles.pageButton} ${currentPage === pageNum ? styles.active : ''}`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
                 <button
                   onClick={() => changePage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 border rounded disabled:opacity-50 bg-white hover:bg-slate-50"
+                  className={styles.paginationButton}
                 >
                   Next
                 </button>
-              </div>
+              </motion.div>
             )}
           </section>
         </main>

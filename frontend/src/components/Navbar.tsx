@@ -90,7 +90,7 @@ export default function Navbar() {
           {/* USER AVATAR */}
           <div className={styles.userAvatarContainer}>
             <motion.img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=user&backgroundColor=b6e3f4"
+              src="https://api.dicebear.com/7.x/notionists/svg?seed=Nitesh"
               className={styles.userAvatar}
               onClick={() => setOpenUser(!openUser)}
               whileHover={{ scale: 1.07 }}
@@ -119,7 +119,10 @@ export default function Navbar() {
 
                   <div className={styles.dropdownDivider} />
 
-                  <button className={styles.dropdownItemLogout} onClick={handleLogout}>
+                  <button
+                    className={styles.dropdownItemLogout}
+                    onClick={handleLogout}
+                  >
                     🚪 Logout
                   </button>
                 </motion.div>
@@ -164,7 +167,7 @@ export default function Navbar() {
               {/* USER HEADER */}
               <div className={styles.menuHeader}>
                 <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                  src="https://api.dicebear.com/7.x/notionists/svg?seed=Nitesh"
                   className={styles.profileImage}
                 />
 
@@ -193,9 +196,7 @@ export default function Navbar() {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `${styles.menuItem} ${
-                          isActive ? styles.menuItemActive : ""
-                        }`
+                        `${styles.menuItem} ${isActive ? styles.menuItemActive : ""}`
                       }
                       onClick={() => setOpenMenu(false)}
                     >

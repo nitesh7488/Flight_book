@@ -1,4 +1,4 @@
-/* ========== ROOT VARIABLES (Color System) ========== */
+/* ========== ROOT VARIABLES ========== */
 :root {
   --primary: #3b82f6;
   --primary-light: #60a5fa;
@@ -17,8 +17,8 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
 
-  --white: #fff;
-  --black: #000;
+  --white: #ffffff;
+  --black: #000000;
 
   --transition: 0.25s ease;
   --radius-lg: 14px;
@@ -31,11 +31,11 @@
   position: fixed;
   inset: 0 0 auto 0;
   height: 70px;
-  z-index: 1000;
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.75);
   transition: background var(--transition);
-  overflow: visible !important; /* FIXED: allow mobile menu to slide out */
+  z-index: 1000;
+  overflow: visible !important;
 }
 
 .scrolled {
@@ -43,15 +43,14 @@
   box-shadow: var(--shadow);
 }
 
-/* Background blur */
 .navbarBackground {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.45);
 }
 
-/* Container */
+/* CONTAINER */
 .navbarContainer {
   max-width: 1400px;
   margin: auto;
@@ -98,11 +97,11 @@
 }
 
 .navLink {
-  color: var(--gray-600);
+  position: relative;
   text-decoration: none;
+  color: var(--gray-600);
   font-weight: 500;
   padding: 8px 0;
-  position: relative;
   transition: color var(--transition);
 }
 
@@ -146,8 +145,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  cursor: pointer;
   border: 2px solid var(--primary-light);
+  cursor: pointer;
   transition: var(--transition);
 }
 
@@ -158,26 +157,26 @@
 /* ========== USER DROPDOWN ========== */
 .userDropdown {
   position: absolute;
-  top: 52px;
   right: 0;
+  top: 52px;
   width: 200px;
   background: var(--white);
-  box-shadow: var(--shadow);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
   overflow: hidden;
-  z-index: 3500 !important; /* FIXED */
+  z-index: 3500 !important;
 }
 
 .dropdownItem {
   width: 100%;
   padding: 12px 18px;
+  text-align: left;
   background: transparent;
   border: none;
-  text-align: left;
   cursor: pointer;
   font-size: 14px;
-  transition: var(--transition);
   color: var(--gray-700);
+  transition: var(--transition);
 }
 
 .dropdownItem:hover {
@@ -193,11 +192,11 @@
 .dropdownItemLogout {
   width: 100%;
   padding: 12px 18px;
-  background: transparent;
-  border: none;
-  color: #dc2626;
   text-align: left;
+  color: #dc2626;
   font-weight: 600;
+  border: none;
+  background: transparent;
 }
 
 .dropdownItemLogout:hover {
@@ -206,13 +205,13 @@
 
 /* ========== MOBILE MENU BUTTON ========== */
 .mobileMenuToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 38px;
   height: 38px;
-  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: transparent;
+  border: none;
   cursor: pointer;
 }
 
@@ -241,22 +240,22 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Hide mobile toggle on desktop */
 @media (min-width: 1024px) {
   .mobileMenuToggle {
     display: none;
   }
 }
 
-/* ========== MOBILE MENU PANEL ========== */
+/* ========== MOBILE MENU OVERLAY ========== */
 .menuOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 2000 !important; /* FIXED */
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 2000 !important;
   pointer-events: auto !important;
 }
 
+/* ========== MOBILE MENU PANEL ========== */
 .mobileMenuPanel {
   position: fixed;
   top: 0;
@@ -264,11 +263,10 @@
   width: 320px;
   height: 100vh;
   background: var(--white);
-  z-index: 3000 !important; /* FIXED */
+  z-index: 3000 !important;
   display: flex;
   flex-direction: column;
-  pointer-events: auto !important;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
 /* HEADER */
@@ -318,11 +316,11 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border-radius: 10px;
+  font-size: 15px;
   text-decoration: none;
+  border-radius: 10px;
   color: var(--gray-700);
   transition: var(--transition);
-  font-size: 15px;
 }
 
 .menuItem:hover {
@@ -345,16 +343,32 @@
   width: 100%;
   padding: 14px;
   background: #fee2e2;
-  border: none;
   border-radius: 10px;
+  border: none;
   font-weight: 700;
-  cursor: pointer;
   color: #dc2626;
+  cursor: pointer;
 }
 
-/* SMALL SCREEN FIX */
+/* ========== SMALL SCREEN FIX (SCROLL ENABLED) ========== */
 @media (max-width: 450px) {
   .mobileMenuPanel {
     width: 100%;
+    overflow: hidden;
+  }
+
+  .menuNavigation {
+    flex: 1;
+    overflow-y: auto !important;
+    padding-bottom: 40px;
+  }
+
+  .menuNavigation::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .menuNavigation::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 4px;
   }
 }

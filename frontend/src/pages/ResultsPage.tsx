@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { searchFlights, setSelectedFlight } from "../store/flightSlice";
+// import { Flight } from "../store/flightSlice";
 import FlightCard from "../components/FlightCard";
 import styles from "./ResultsPage.module.css";
 

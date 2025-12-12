@@ -9,23 +9,28 @@ export default function Navbar() {
   const [openMenu, setOpenMenu] = useState(false);
   const [openUser, setOpenUser] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
 
-  // Handle scroll effect
+  /** SCROLL EFFECT */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  /** CLOSE MENU ON ROUTE CHANGE */
   useEffect(() => {
     setOpenMenu(false);
+    setOpenUser(false);
   }, [location]);
+
+  /** DISABLE BODY SCROLL WHEN MENU OPEN */
+  useEffect(() => {
+    document.body.style.overflow = openMenu ? "hidden" : "unset";
+  }, [openMenu]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -46,219 +51,167 @@ export default function Navbar() {
   ];
 
   return (
-    <motion.nav 
-      className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}
-      initial={{ y: -100 }}
+    <motion.nav
+      className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}
+      initial={{ y: -80 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+      transition={{ duration: 0.4 }}
     >
-      {/* Background blur layer */}
       <div className={styles.navbarBackground} />
 
       <div className={styles.navbarContainer}>
-        {/* Brand Logo */}
-        <motion.div 
-          className={styles.brand}
-          onClick={() => navigate("/home")}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
+        {/* BRAND */}
+        <div className={styles.brand} onClick={() => navigate("/home")}>
           <span className={styles.brandIcon}>✈️</span>
           <span className={styles.brandName}>
             Flight<span className={styles.brandHighlight}>Booker</span>
           </span>
-        </motion.div>
+        </div>
 
-        {/* Desktop Navigation */}
+        {/* DESKTOP NAV */}
         <div className={styles.desktopNav}>
           {navItems.map((item) => (
-            <NavLink 
+            <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => 
-                `${styles.navLink} ${isActive ? styles.active : ''}`
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.active : ""}`
               }
             >
-              <span className={styles.navIcon}>{item.icon}</span>
+              <span>{item.icon}</span>
               <span>{item.label}</span>
-              <motion.span 
-                className={styles.navUnderline}
-                layoutId="underline"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
+              <span className={styles.navUnderline}></span>
             </NavLink>
           ))}
         </div>
 
-        {/* User Profile & Actions */}
+        {/* USER SECTION */}
         <div className={styles.userSection}>
-          {/* User Avatar */}
-          <motion.div className={styles.userAvatarContainer}>
+          {/* USER AVATAR */}
+          <div className={styles.userAvatarContainer}>
             <motion.img
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=user&backgroundColor=b6e3f4"
-              onClick={() => setOpenUser(!openUser)}
               className={styles.userAvatar}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              animate={{ 
-                rotate: openUser ? 360 : 0,
-                transition: { duration: 0.3 }
-              }}
+              onClick={() => setOpenUser(!openUser)}
+              whileHover={{ scale: 1.07 }}
             />
-            
-            {/* User Dropdown */}
+
             <AnimatePresence>
               {openUser && (
-                <motion.div 
+                <motion.div
                   className={styles.userDropdown}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
                 >
                   {userMenuItems.map((item) => (
-                    <motion.button
+                    <button
                       key={item.label}
+                      className={styles.dropdownItem}
                       onClick={() => {
                         item.action();
                         setOpenUser(false);
                       }}
-                      className={styles.dropdownItem}
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       {item.label}
-                    </motion.button>
+                    </button>
                   ))}
+
                   <div className={styles.dropdownDivider} />
-                  <motion.button
-                    onClick={handleLogout}
-                    className={styles.dropdownItemLogout}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <span>🚪</span>
-                    <span>Logout</span>
-                  </motion.button>
+
+                  <button className={styles.dropdownItemLogout} onClick={handleLogout}>
+                    🚪 Logout
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
 
-          {/* Mobile Menu Toggle */}
-          <motion.button
+          {/* MOBILE MENU BUTTON */}
+          <button
             className={styles.mobileMenuToggle}
-            onClick={() => {
-              setOpenMenu(!openMenu);
-              setOpenUser(false);
-            }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            animate={{ rotate: openMenu ? 90 : 0 }}
+            onClick={() => setOpenMenu(!openMenu)}
           >
-            <motion.div
-              animate={openMenu ? "open" : "closed"}
-              variants={{
-                open: { rotate: 45, y: 7 },
-                closed: { rotate: 0, y: 0 }
-              }}
-              className={styles.menuLine}
-            />
-            <motion.div
-              animate={openMenu ? "open" : "closed"}
-              variants={{
-                open: { opacity: 0 },
-                closed: { opacity: 1 }
-              }}
-              className={styles.menuLine}
-            />
-            <motion.div
-              animate={openMenu ? "open" : "closed"}
-              variants={{
-                open: { rotate: -45, y: -7 },
-                closed: { rotate: 0, y: 0 }
-              }}
-              className={styles.menuLine}
-            />
-          </motion.button>
+            <div className={styles.hamburger}>
+              <span className={`${styles.line} ${openMenu ? styles.line1Open : ""}`}></span>
+              <span className={`${styles.line} ${openMenu ? styles.line2Open : ""}`}></span>
+              <span className={`${styles.line} ${openMenu ? styles.line3Open : ""}`}></span>
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {openMenu && (
           <>
-            {/* Overlay */}
+            {/* OVERLAY */}
             <motion.div
-              className={styles.mobileOverlay}
+              className={styles.menuOverlay}
               onClick={() => setOpenMenu(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
 
-            {/* Mobile Menu */}
+            {/* PANEL */}
             <motion.div
-              className={styles.mobileMenu}
+              className={styles.mobileMenuPanel}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              {/* Mobile Menu Header */}
-              <div className={styles.mobileMenuHeader}>
-                <div className={styles.mobileUserInfo}>
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=user&backgroundColor=b6e3f4"
-                    className={styles.mobileAvatar}
-                    alt="User"
-                  />
-                  <div>
-                    <p className={styles.mobileUserName}>Welcome Back!</p>
-                    <p className={styles.mobileUserEmail}>traveler@example.com</p>
-                  </div>
+              {/* USER HEADER */}
+              <div className={styles.menuHeader}>
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                  className={styles.profileImage}
+                />
+
+                <div>
+                  <h3 className={styles.userName}>Welcome Traveler!</h3>
+                  <p className={styles.userEmail}>traveler@example.com</p>
                 </div>
+
+                <button
+                  className={styles.closeButton}
+                  onClick={() => setOpenMenu(false)}
+                >
+                  ✕
+                </button>
               </div>
 
-              {/* Mobile Menu Items */}
-              <div className={styles.mobileMenuItems}>
+              {/* NAV LINKS */}
+              <div className={styles.menuNavigation}>
                 {navItems.map((item, index) => (
                   <motion.div
                     key={item.path}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.08 }}
                   >
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `${styles.mobileNavLink} ${isActive ? styles.mobileActive : ''}`
+                        `${styles.menuItem} ${
+                          isActive ? styles.menuItemActive : ""
+                        }`
                       }
                       onClick={() => setOpenMenu(false)}
                     >
-                      <span className={styles.mobileNavIcon}>{item.icon}</span>
-                      <span>{item.label}</span>
-                      <motion.span
-                        className={styles.mobileNavIndicator}
-                        layoutId="mobileIndicator"
-                        transition={{ type: "spring", stiffness: 300 }}
-                      />
+                      <span className={styles.menuIcon}>{item.icon}</span>
+                      <span className={styles.menuLabel}>{item.label}</span>
+                      <span className={styles.menuArrow}>›</span>
                     </NavLink>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Mobile Menu Footer */}
-              <div className={styles.mobileMenuFooter}>
-                <motion.button
-                  onClick={handleLogout}
-                  className={styles.mobileLogoutButton}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>🚪</span>
-                  <span>Logout</span>
-                </motion.button>
+              {/* FOOTER */}
+              <div className={styles.menuFooter}>
+                <button className={styles.logoutButton} onClick={handleLogout}>
+                  🚪 Logout
+                </button>
               </div>
             </motion.div>
           </>

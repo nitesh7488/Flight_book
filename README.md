@@ -1,3 +1,12 @@
+<img width="1341" height="533" alt="image" src="https://github.com/user-attachments/assets/faa8d4a4-8f70-4e10-88f4-2e863c7e0b51" />
+
+
+
+<img width="1330" height="612" alt="image" src="https://github.com/user-attachments/assets/542b820f-9edb-4c71-b19c-3a7d59c5f813" />
+
+
+
+
 # Flight Booking Application
 
 A full-stack flight booking application built with React (frontend) and Node.js/Express (backend), featuring user authentication, flight search, booking management, and a PostgreSQL database managed by Prisma.
@@ -10,6 +19,8 @@ A full-stack flight booking application built with React (frontend) and Node.js/
 - **Responsive UI**: Modern, mobile-friendly interface built with React and Tailwind CSS.
 - **Real-time Data**: Dynamic flight data seeded for 4 months across multiple Indian cities and airlines.
 - **Admin Features**: (If applicable, extendable for admin roles).
+
+
 
 ## Tech Stack
 

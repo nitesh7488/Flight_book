@@ -46,7 +46,7 @@ Before running the application, ensure you have the following installed:
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/nitesh7488/Flight_book.git
    cd FlightBooker
    ```
 
@@ -231,6 +231,11 @@ FlightBooker/
 
 This project is licensed under the MIT License.
 
-## Support
+## 💬 Support
 
-For issues or questions, please open an issue on GitHub or contact the maintainers.
+If you have any issues, suggestions, or questions, feel free to reach out.
+
+📌 **GitHub Issues:** Open an issue in this repository  
+🔗 **LinkedIn:** [Nitesh Kumar](https://www.linkedin.com/in/nitesh-kumar654/)  
+📱 **WhatsApp:** +91 910261534
+

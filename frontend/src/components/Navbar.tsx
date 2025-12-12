@@ -64,7 +64,7 @@ export default function Navbar() {
         <div className={styles.brand} onClick={() => navigate("/home")}>
           <span className={styles.brandIcon}>✈️</span>
           <span className={styles.brandName}>
-            Flight<span className={styles.brandHighlight}>Booker</span>
+            Sky<span className={styles.brandHighlight}>Portal</span>
           </span>
         </div>
 

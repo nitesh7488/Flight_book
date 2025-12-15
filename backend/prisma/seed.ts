@@ -22,8 +22,7 @@ async function main() {
 
   const cities = [
     "Delhi","Mumbai","Bangalore","Chennai","Kolkata","Hyderabad",
-    "Pune","Goa","Jaipur","Ahmedabad","Kochi","Lucknow","Ahmedabad", "Jaipur", "Kochi", "Lucknow",
-    "Guwahati", "Bhubaneswar", "Thiruvananthapuram", "Indore"
+    "Pune", "Ranchi"
   ];
 
   const airlines = [

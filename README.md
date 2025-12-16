@@ -4,6 +4,11 @@
 
 <img width="1330" height="612" alt="image" src="https://github.com/user-attachments/assets/542b820f-9edb-4c71-b19c-3a7d59c5f813" />
 
+Booking History
+
+<img width="1335" height="631" alt="image" src="https://github.com/user-attachments/assets/ced521d9-b2fb-4370-8d51-f6c79b6f4793" />
+
+
 
 
 

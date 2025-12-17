@@ -18,7 +18,7 @@ function generateDailyTimes() {
 
 async function main() {
   const today = new Date();
-  const totalDays = 120; // 4 months
+  const totalDays = 60; // 2 months
 
   const cities = [
     "Delhi","Mumbai","Bangalore","Chennai","Kolkata","Hyderabad","Ranchi"

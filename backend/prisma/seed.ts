@@ -21,8 +21,8 @@ async function main() {
   const totalDays = 120; // 4 months
 
   const cities = [
-    "Delhi","Mumbai","Bangalore","Chennai","Kolkata","Hyderabad",
-    "Pune", "Ranchi"
+    "Delhi","Mumbai","Bangalore","Chennai","Kolkata","Hyderabad","Ranchi"
+    
   ];
 
   const airlines = [
